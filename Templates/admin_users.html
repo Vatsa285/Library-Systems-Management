@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Management</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <style>
+    .user-table {
+      width: 100%;
+      max-width: 800px;
+      margin: 20px auto;
+      border-collapse: collapse;
+      background-color: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    
+    .user-table th, .user-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .user-table th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+    
+    .action-btn {
+      padding: 5px 10px;
+      margin: 2px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+    }
+    
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+    
+    .delete-btn:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1 style="text-align:center;">LIBRARY MANAGEMENT SYSTEM</h1>
+  <div style="text-align:center;">
+    <h2>USER MANAGEMENT</h2>
+  </div>
+  
+  <table class="user-table" id="usersTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="usersTableBody">
+      <!-- Users will be populated here -->
+    </tbody>
+  </table>
+  
+  <div class="link-group">
+    <a href="/index">Back to Dashboard</a>
+  </div>
+  <div id="messageArea" class="message-area"></div>
+
+  <script>
+    async function loadUsers() {
+      try {
+        const response = await fetch('/api/admin/users');
+        const users = await response.json();
+        
+        const tbody = document.getElementById('usersTableBody');
+        tbody.innerHTML = '';
+        
+        users.forEach(user => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.username}</td>
+            <td>${user.role}</td>
+            <td>${user.status}</td>
+            <td>
+              <button class="action-btn delete-btn" 
+                      onclick="deleteUser(${user.id})" 
+                      ${user.is_initial_admin ? 'disabled title="Cannot delete initial admin"' : ''}>
+                Delete
+              </button>
+            </td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Error loading users:', error);
+      }
+    }
+    
+    async function deleteUser(userId) {
+      if (!confirm('Are you sure you want to delete this user?')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`/api/admin/users/${userId}`, {
+          method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        const msgArea = document.getElementById('messageArea');
+        
+        if (response.ok) {
+          msgArea.textContent = result.message;
+          msgArea.className = 'message-area success';
+          loadUsers(); // Reload the table
+        } else {
+          msgArea.textContent = result.error;
+          msgArea.className = 'message-area error';
+        }
+      } catch (error) {
+        console.error('Error deleting user:', error);
+      }
+    }
+    
+    // Load users when page loads
+    document.addEventListener('DOMContentLoaded', loadUsers);
+  </script>
+</body>
+</html>

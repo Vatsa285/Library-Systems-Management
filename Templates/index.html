@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f9f9f9; margin: 0; padding: 20px; }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Library Management System</h1>
+        <nav id="authNav">
+            <!-- Auth links will be populated by JS -->
+        </nav>
+    </header>
+    <div class="message-area" id="messageArea"></div>
+
+    <!-- Admin Section (conditionally displayed) -->
+    <div id="adminSection" style="display:none;">
+        <h2>Admin Panel</h2>
+        <div class="container">
+            <!-- Add Book Form -->
+            <div class="form-section">
+                <h3>Add New Book</h3>
+                <form id="addBookForm">
+                    <input type="text" id="bookTitle" placeholder="Title" required>
+                    <input type="text" id="bookAuthor" placeholder="Author" required>
+                    <input type="text" id="bookIsbn" placeholder="ISBN" required>
+                    <input type="number" id="bookQuantity" placeholder="Quantity" required min="1">
+                    <button type="submit">Add Book</button>
+                </form>
+            </div>
+            <!-- Add User Form (Admin creates users) -->
+            <div class="form-section">
+                <h3>Add New User</h3>
+                <form id="adminAddUserForm">
+                    <input type="text" id="adminAddUsername" placeholder="Username" required>
+                    <input type="password" id="adminAddPassword" placeholder="Password" required>
+                    <select id="adminAddUserRole">
+                        <option value="member" selected>Member</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button type="submit">Add User</button>
+                </form>
+            </div>
+        </div>
+        <div class="list-section">
+            <h3>All Users (<button onclick="fetchUsers()" class="action-button">Refresh</button>)</h3>
+            <div id="userList"></div>
+        </div>
+        <div class="list-section">
+            <h3>Pending User Approvals (<button onclick="fetchPendingUsers()" class="action-button">Refresh</button>)</h3>
+            <div id="pendingUserList"></div>
+        </div>
+    </div>
+
+    <!-- Member/General Section -->
+    <div class="container" id="memberSection" style="display:none;">
+        <!-- Borrow Book Form -->
+        <div class="form-section" id="borrowSection">
+            <h2>Borrow Book</h2>
+            <form id="borrowBookForm">
+                <input type="text" id="borrowBookIsbn" placeholder="Book ISBN to Borrow" required>
+                <button type="submit">Borrow Book</button>
+            </form>
+        </div>
+
+        <!-- Return Book Form -->
+        <div class="form-section" id="returnSection">
+            <h2>Return Book</h2>
+            <form id="returnBookForm">
+                <input type="text" id="returnBookIsbn" placeholder="Book ISBN to Return" required>
+                <button type="submit">Return Book</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Book List -->
+    <div class="list-section">
+        <h2>Available Books (<button onclick="fetchBooks()" class="action-button">Refresh</button>)</h2>
+        <input type="text" id="searchBookInput" placeholder="Search books by title, author, ISBN...">
+        <div id="bookList"></div>
+    </div>
+
+    <!-- Borrowed Records -->
+    <div class="list-section" id="borrowedListSection" style="display:none;">
+        <h2 id="borrowedHeader">
+            My Borrowed Records
+            <span id="adminBorrowedLabel" style="display:none;">/ All (Admin)</span>
+            (<button onclick="fetchBorrowedRecords()" class="action-button">Refresh</button>)
+        </h2>
+        <div id="borrowedRecordsList"></div>
+    </div>
+
+    <!-- Edit Book Modal -->
+    <div id="editBookModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeEditModal()">×</span>
+            <h2>Edit Book</h2>
+            <form id="editBookForm">
+                <input type="hidden" id="editBookId">
+                <label for="editBookTitle">Title:</label>
+                <input type="text" id="editBookTitle" required>
+                <label for="editBookAuthor">Author:</label>
+                <input type="text" id="editBookAuthor" required>
+                <label for="editBookIsbn">ISBN:</label>
+                <input type="text" id="editBookIsbn" required>
+                <label for="editBookQuantity">Total Quantity:</label>
+                <input type="number" id="editBookQuantity" required min="0">
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div id="changePasswordModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeChangePasswordModal()">×</span>
+            <h2>Change Password</h2>
+            <form id="changePasswordForm">
+                <label for="currentPassword">Current Password:</label>
+                <input type="password" id="currentPassword" required>
+                <label for="newPassword">New Password:</label>
+                <input type="password" id="newPassword" required minlength="6">
+                <label for="confirmPassword">Confirm New Password:</label>
+                <input type="password" id="confirmPassword" required minlength="6">
+                <button type="submit">Change Password</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Fine Payment Modal -->
+    <div id="finePaymentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeFinePaymentModal()">×</span>
+            <h2>Mark Fine as Paid</h2>
+            <input type="hidden" id="fineRecordId">
+            <div class="fine-amount">
+                Fine Amount: $<span id="fineAmountDisplay">0.00</span>
+            </div>
+            <div class="checkbox-container">
+                <input type="checkbox" id="finePaymentConfirm">
+                <label for="finePaymentConfirm">I confirm that this fine has been paid by the user</label>
+            </div>
+            <button onclick="confirmFinePayment()">Mark as Paid</button>
+        </div>
+    </div>
+
+    <!-- Main JS file -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

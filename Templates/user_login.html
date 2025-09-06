@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>User Login</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <h1 style="text-align:center;">LIBRARY MANAGEMENT SYSTEM</h1>
+  <div class="login-section">
+    <h2>USER LOGIN</h2>
+    <form id="userLoginForm">
+      <input type="text" id="userUsername" placeholder="Username" required>
+      <input type="password" id="userPassword" placeholder="Password" required>
+      <button type="submit">Login</button>
+    </form>
+  </div>
+  <div class="link-group">
+    <a href="{{ url_for('request_account') }}">REQUEST ACCOUNT</a>
+    <a href="{{ url_for('admin_login') }}">ADMINISTRATOR LOGIN</a>
+  </div>
+  <div id="authMessageArea" class="message-area"></div>
+
+  <script>
+    document.getElementById('userLoginForm').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const username = document.getElementById('userUsername').value;
+      const password = document.getElementById('userPassword').value;
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+      const result = await response.json();
+      const msgArea = document.getElementById('authMessageArea');
+      if (response.ok) {
+        msgArea.textContent = result.message;
+        msgArea.className = 'message-area success';
+        window.location.href = '/index';
+      } else {
+        msgArea.textContent = result.error;
+        msgArea.className = 'message-area error';
+      }
+    });
+  </script>
+</body>
+</html>
